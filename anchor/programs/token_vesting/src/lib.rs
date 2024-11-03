@@ -81,7 +81,7 @@ pub mod token_vesting {
         let transfer_cpi_accounts = TransferChecked {
             from: context.accounts.treasury_token_account.to_account_info(),
             mint: context.accounts.mint.to_account_info(),
-            to: context.accounts.employee_account.to_account_info(),
+            to: context.accounts.employee_token_account.to_account_info(),
             authority: context.accounts.treasury_token_account.to_account_info(),
         };
         let cpi_program = context.accounts.token_program.to_account_info();
@@ -92,10 +92,13 @@ pub mod token_vesting {
                 &[context.accounts.vesting_account.treasury_bump],
             ],
         ];
-        let cpi_context = CpiContext::new(cpi_program, transfer_cpi_accounts).with_remaining_accounts(signer_seeds);
+        let cpi_context = CpiContext::new(
+            cpi_program,
+            transfer_cpi_accounts
+        ).with_signer(signer_seeds);
         let decimals = context.accounts.mint.decimals;
-        token_interface::transfer_checked(cpi_context,claimable_amount as u64,decimals);
-        emp_account.total_withdrawn+=claimable_amount;
+        token_interface::transfer_checked(cpi_context, claimable_amount as u64, decimals);
+        emp_account.total_withdrawn += claimable_amount;
         Ok(())
     }
 }
